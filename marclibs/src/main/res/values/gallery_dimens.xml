@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 [1076559197@qq.com | tchen0707@gmail.com]
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License”);
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <dimen name="gallery_common_load_more_progress_size">30dp</dimen>
+    <dimen name="gallery_common_load_more_padding">20dp</dimen>
+    <dimen name="gallery_common_loading_progress_size">35dp</dimen>
+    <dimen name="gallery_common_loading_text_margin">10dp</dimen>
+    <dimen name="gallery_common_loading_text_lines_spacing">5dp</dimen>
+
+    <!--&lt;!&ndash;uCrop Activity&ndash;&gt;-->
+    <!--<dimen name="gallery_ucrop_size_dot_scale_text_view">8dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_height_horizontal_wheel_progress_line">20dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_width_horizontal_wheel_progress_line">2dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_margin_horizontal_wheel_progress_line">10dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_height_wrapper_controls">64dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_height_wrapper_states">72dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_height_divider_shadow">3dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_text_size_widget_text">13sp</dimen>-->
+    <!--<dimen name="gallery_ucrop_margit_top_widget_text">10sp</dimen>-->
+    <!--<dimen name="gallery_ucrop_size_wrapper_rotate_button">50dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_height_crop_aspect_ratio_text">40dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_progress_size">30dp</dimen>-->
+
+    <!--&lt;!&ndash;Crop View&ndash;&gt;-->
+    <!--<dimen name="gallery_ucrop_default_crop_grid_stroke_width">1dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_default_crop_frame_stroke_width">1dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_default_crop_rect_corner_touch_threshold">30dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_default_crop_rect_min_size">100dp</dimen>-->
+    <!--<dimen name="gallery_ucrop_default_crop_rect_corner_touch_area_line_length">10dp</dimen>-->
+
+    <dimen name="gallery_grid_item_margin">1dp</dimen>
+    <dimen name="gallery_divider_decoration_height">0.5dp</dimen>
+    <dimen name="gallery_bucket_margin">10dp</dimen>
+    <dimen name="gallery_margin">10dp</dimen>
+</resources>

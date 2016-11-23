@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">MarcReading</string>
+    <string name="menu_main_please_login">pleash login</string>
+    <string name="menu_main_1">my meesage</string>
+    <string name="menu_main_sync_bookshelf">sync_bookshelf</string>
+    <string name="menu_main_scan_local_book">扫描本地书籍</string>
+    <string name="menu_main_wifi_book">wifi传书</string>
+    <string name="menu_main_feedback">反馈</string>
+    <string name="menu_main_night_mode">夜间模式</string>
+    <string name="menu_main_settings">设置</string>
+    <string name="add_the_book_you_like">添加你喜欢的小说</string>
+    <string name="to_add">去添加</string>
+</resources>

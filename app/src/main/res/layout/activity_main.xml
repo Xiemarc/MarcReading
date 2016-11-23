@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:marc="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    tools:context="com.xiemarc.marcreading.main.widget.MainActivity">
+
+    <include layout="@layout/common_toolbar" />
+
+    <com.xiemarc.marcreading.widget.CustomeIndicator
+        android:id="@+id/indicator"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal"
+        marc:indicator_color="@color/common_bg"
+        marc:indicator_src="@drawable/circle"
+        marc:indicator_style="bitmap"
+        marc:item_count="3"
+        marc:text_color_hightlight="@color/white"
+        marc:text_color_normal="@color/light_gray" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

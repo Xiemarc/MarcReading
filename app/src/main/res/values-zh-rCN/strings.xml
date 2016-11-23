@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">网络小说</string>
+    <string name="menu_main_please_login">请登录</string>
+    <string name="menu_main_1">我的信息</string>
+    <string name="menu_main_sync_bookshelf">同步书架</string>
+    <string name="menu_main_scan_local_book">扫描本地书籍</string>
+    <string name="menu_main_feedback">反馈</string>
+    <string name="menu_main_night_mode">夜间模式</string>
+    <string name="add_the_book_you_like">添加你喜欢的小说</string>
+    <string name="to_add">去添加</string>
+</resources>
