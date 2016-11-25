@@ -224,16 +224,27 @@ public class CustomeIndicator extends LinearLayout {
 
                 break;
             case STYLE_SQUARE:
-            case STYLE_BITMAP:
-
-			/*
-			 * 方形/图标指示器:宽,高与item相等
+                /*
+			 * 方形:宽,高与item相等
 			 */
                 mIndicatorWidth = w / mTabVisibleCount;
                 mIndicatorHeight = h;
                 mTranslationX = 0;
                 mRectF = new Rect(0, 0, mIndicatorWidth, mIndicatorHeight);
-
+                break;
+            case STYLE_BITMAP:
+                //图标指示器:宽,高与item相等
+                mIndicatorWidth = w / mTabVisibleCount;
+                mIndicatorHeight = h;
+                mTranslationX = 0;
+                //在圆心
+                int left = mIndicatorWidth/2-mBitmap.getWidth()/2;
+                int right = left+mBitmap.getWidth();
+                int top = mIndicatorHeight-10-mBitmap.getHeight();
+                int bottom = mIndicatorHeight - 10;
+//                mRectF = new Rect(mIndicatorWidth/2, mIndicatorHeight-mBitmap.getHeight(), mIndicatorWidth/2+mBitmap.getWidth()
+//                        , mIndicatorHeight/2+mBitmap.getHeight());
+                mRectF = new Rect(left,top,right,bottom);
                 break;
             case STYLE_TRIANGLE:
 

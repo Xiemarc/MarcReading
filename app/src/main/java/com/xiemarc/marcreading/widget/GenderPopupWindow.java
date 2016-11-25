@@ -11,9 +11,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 
+import com.marc.marclibs.rxbus.RxBus;
 import com.xiemarc.marcreading.R;
 import com.xiemarc.marcreading.manager.Constant;
 import com.xiemarc.marcreading.manager.SettingManager;
+import com.xiemarc.marcreading.rx.eventbus.UserSexChooseFinishedEvent;
 
 
 /**
@@ -55,11 +57,15 @@ public class GenderPopupWindow extends PopupWindow {
             SettingManager.getInstance().saveUserChooseSex(Constant.Gender.MALE);
             dismiss();
         });
-        setOnDismissListener(()->{
+        setOnDismissListener(() -> {
             //屏幕背景恢复亮度
+            //发送选择性别结束的事件
+            RxBus.getDefault().post(new UserSexChooseFinishedEvent());
             lighton();
         });
     }
+
+
     /**
      * 背景变暗
      */

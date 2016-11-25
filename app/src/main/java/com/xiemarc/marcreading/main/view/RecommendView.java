@@ -19,8 +19,4 @@ public interface RecommendView extends BaseView{
      */
     void showRecommendList(List<Recommend.RecommendBooks> list);
 
-    /**
-     * 结束的时候关闭刷新
-     */
-    void complete();
 }

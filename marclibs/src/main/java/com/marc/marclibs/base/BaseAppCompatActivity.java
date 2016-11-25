@@ -2,17 +2,17 @@ package com.marc.marclibs.base;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 
 import com.marc.marclibs.R;
@@ -21,7 +21,7 @@ import com.marc.marclibs.netstatus.NetChangeObserver;
 import com.marc.marclibs.netstatus.NetStateReceiver;
 import com.marc.marclibs.netstatus.NetUtils;
 import com.marc.marclibs.utils.CommonUtils;
-import com.readystatesoftware.systembartint.SystemBarTintManager;
+import com.marc.marclibs.utils.StatusBarCompat;
 
 import butterknife.ButterKnife;
 
@@ -66,6 +66,15 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
         LEFT, RIGHT, TOP, BOTTOM, SCALE, FADE
     }
 
+    /**
+     * 状态栏颜色
+     */
+    protected int statusBarColor = 0;
+    /**
+     * 状态栏view
+     */
+    protected View statusBarView = null;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (toggleOverridePendingTransition()) { //如果需要切换acitivty
@@ -97,8 +106,6 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
         if (null != extras) {
             getBundleExtras(extras);
         }
-        setTranslucentStatus(isApplyStatusBarTranslucency());
-        mContext = this;
         TAG_LOG = this.getClass().getSimpleName();
         BaseAppManager.getInstance().addActivity(this);
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -112,7 +119,13 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
         } else {
             throw new IllegalArgumentException("你必须返回一个正确的布局ID");
         }
-
+        if (statusBarColor == 0) {
+            statusBarView = StatusBarCompat.compat(this, ContextCompat.getColor(this, R.color.primary_light));
+        } else if (statusBarColor != -1) {
+            statusBarView = StatusBarCompat.compat(this, statusBarColor);
+        }
+        transparent19and20();
+        mContext = this;
         mNetChangeObserver = new NetChangeObserver() {
             @Override
             public void onNetConnected(NetUtils.NetType type) {
@@ -147,6 +160,14 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         if (null != getLoadingTargetView()) {
             mVaryViewHelperController = new VaryViewHelperController(getLoadingTargetView());
+        }
+    }
+
+    protected void transparent19and20() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+                && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //透明状态栏
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
     }
 
@@ -235,20 +256,14 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
     protected abstract void onNetworkDisConnected();
 
 
-    /**
-     * 是否设置状态栏透明
-     * <br>状态栏的高度
-     *
-     * @return
-     */
-    protected abstract boolean isApplyStatusBarTranslucency();
-
 //    /**
-//     * 绑定eventbus
+//     * 是否设置状态栏透明
+//     * <br>状态栏的高度
 //     *
 //     * @return
 //     */
-//    protected abstract boolean isBindEventBusHere();
+//    protected abstract boolean isApplyStatusBarTranslucency();
+
 
     /**
      * 控制 activity切换模式
@@ -429,51 +444,27 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity {
         }
     }
 
-//    public void onEventMainThread(EventCenter eventCenter) {
-//        if (null != eventCenter) {
-//            onEventComming(eventCenter);
-//        }
-//    }
-
     /**
-     * 使用系统状态栏着色
-     * use SytemBarTintManager
-     * //在4.4的translucent 模式下（translucent modes），为状态栏以及导航栏设置背景颜色。
-     *
-     * @param tintDrawable
+     * 隐藏状态栏
      */
-    protected void setSystemBarTintDrawable(Drawable tintDrawable) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            SystemBarTintManager mTintManager = new SystemBarTintManager(this);
-            if (tintDrawable != null) {
-                mTintManager.setStatusBarTintEnabled(true);
-                mTintManager.setTintDrawable(tintDrawable);
-            } else {
-                mTintManager.setStatusBarTintEnabled(false);
-                mTintManager.setTintDrawable(null);
-            }
+    protected void hideStatusBar() {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        getWindow().setAttributes(attrs);
+        if (statusBarView != null) {
+            statusBarView.setBackgroundColor(Color.TRANSPARENT);
         }
-
     }
 
     /**
-     * 设置状态栏透明
-     * set status bar translucenc
-     *
-     * @param on
+     * 显示状态栏
      */
-    protected void setTranslucentStatus(boolean on) {
-        //android版本大于4.4
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window win = getWindow();
-            WindowManager.LayoutParams winParams = win.getAttributes();
-            final int bits = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
-            if (on) {
-                winParams.flags |= bits;
-            } else {
-                winParams.flags &= ~bits;
-            }
-            win.setAttributes(winParams);
+    protected void showStatusBar() {
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.flags &= ~WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        getWindow().setAttributes(attrs);
+        if (statusBarView != null) {
+            statusBarView.setBackgroundColor(statusBarColor);
         }
     }
 

@@ -3,6 +3,7 @@ package com.xiemarc.marcreading.base;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -41,12 +42,9 @@ public abstract class BaseSwipeBackActivity<V, T extends BasePresenter<V>>
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         mPresenter = createPresenter();
+        statusBarColor = ContextCompat.getColor(this, R.color.colorPrimary);
         super.onCreate(savedInstanceState);
         mPresenter.attachView((V) this);
-        if (isApplyKitKatTranslucency()) {
-            //如果这是状态栏透明
-            setSystemBarTintDrawable(getResources().getDrawable(R.drawable.sr_primary));
-        }
     }
 
     @Override

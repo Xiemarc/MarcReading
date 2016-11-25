@@ -10,4 +10,9 @@
     <string name="menu_main_settings">设置</string>
     <string name="add_the_book_you_like">添加你喜欢的小说</string>
     <string name="to_add">去添加</string>
+
+
+
+    <string name="book_read_alreday_download">已缓存过:%1$s(%2$d/%3$d)...</string>
+    <string name="book_read_download_progress">正在缓存:%1$s(%2$d/%3$d)...</string>
 </resources>

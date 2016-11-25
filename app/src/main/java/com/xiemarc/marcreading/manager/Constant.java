@@ -28,6 +28,7 @@ public class Constant {
 
     public static final String SP_USER_SEX = "userChooseSex";
 
+    public static final String ISNIGHT = "isNight";
 
     @StringDef({
             Gender.MALE,

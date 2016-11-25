@@ -29,10 +29,10 @@ public class SplashActivity extends BaseActivity<SplashView, SplashPresenter> im
     @Bind(R.id.container)
     FrameLayout mContainer;
 
-    @Override
-    protected boolean isApplyKitKatTranslucency() {
-        return false;
-    }
+//    @Override
+//    protected boolean isApplyKitKatTranslucency() {
+//        return false;
+//    }
 
     @Override
     protected SplashPresenter createPresenter() {

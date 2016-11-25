@@ -21,6 +21,7 @@
         marc:indicator_src="@drawable/circle"
         marc:indicator_style="bitmap"
         marc:item_count="3"
+        marc:paddingEnd="10dp"
         marc:text_color_hightlight="@color/white"
         marc:text_color_normal="@color/light_gray" />
 

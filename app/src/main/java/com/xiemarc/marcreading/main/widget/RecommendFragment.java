@@ -7,13 +7,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.marc.marclibs.rxbus.RxBus;
+import com.marc.marclibs.rxbus.RxBusSubscriber;
 import com.xiemarc.marcreading.R;
 import com.xiemarc.marcreading.base.BaseRVFragment;
 import com.xiemarc.marcreading.bean.Recommend;
+import com.xiemarc.marcreading.bookread.widget.ReadActivity;
 import com.xiemarc.marcreading.main.adapter.RecommendAdapter;
 import com.xiemarc.marcreading.main.presenter.RecommendPresenter;
 import com.xiemarc.marcreading.main.view.RecommendView;
 import com.xiemarc.marcreading.recycleview.adapter.RecyclerArrayAdapter;
+import com.xiemarc.marcreading.rx.eventbus.UserSexChooseFinishedEvent;
+import com.xiemarc.marcreading.utils.UIUtils;
 
 import java.util.List;
 
@@ -38,7 +42,6 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
 
     private boolean isSelectAll = false;
 
-
     @Override
     protected RecommendPresenter createPresenter() {
         return new RecommendPresenter(this);
@@ -56,41 +59,42 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
 
     @Override
     protected void initViewsAndEvents() {
-        initAdapter(RecommendAdapter.class, true, false);
+        initAdapter(RecommendAdapter.class, false, false);
         mAdapter.setOnItemClickListener(this);
-
         mAdapter.addFooter(new RecyclerArrayAdapter.ItemView() {
             @Override
             public View onCreateView(ViewGroup parent) {
-                View headerView = LayoutInflater.from(mContext).inflate(R.layout.foot_view_shelf, parent, false);
-                return headerView;
+                View footerView = LayoutInflater.from(mContext).inflate(R.layout.foot_view_shelf, parent, false);
+                return footerView;
             }
 
             @Override
-            public void onBindView(View headerView) {
-                headerView.setOnClickListener(new View.OnClickListener() {
+            public void onBindView(View footerView) {
+                footerView.setOnClickListener(view ->
+                        //进入发现fragment
+                        ((MainActivity) mContext).setCurrentItem(2));
+            }
+        });
+        mRecyclerView.getEmptyView().findViewById(R.id.btnToAdd).setOnClickListener(view ->
+                //进入发现fgragment
+                ((MainActivity) mContext).setCurrentItem(2));
+//        onRefresh();
+        RxBus.getDefault().toObservable(UserSexChooseFinishedEvent.class)
+                .subscribe(new RxBusSubscriber<UserSexChooseFinishedEvent>() {
                     @Override
-                    public void onClick(View v) {
-                        //点击进入发现
-                        ((MainActivity) mContext).setCurrentItem(2);
+                    protected void onEvent(UserSexChooseFinishedEvent userSexChooseFinishedEvent) throws Exception {
+                        //接受到事件，把flag设置为true
+                        mPresenter.getRecommendList();
                     }
                 });
-            }
-        });
-        mRecyclerView.getEmptyView().findViewById(R.id.btnToAdd).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //如果是空试图 点击进入发现
-                ((MainActivity) mContext).setCurrentItem(2);
-            }
-        });
-        onRefresh();
+
     }
 
 
     @Override
     protected void onFirstUserVisible() {
-        mPresenter.getRecommendList();
+        //第一次可见进入该代码部分
+
     }
 
     @Override
@@ -103,12 +107,6 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
 
     }
 
-    @Override
-    public void complete() {
-        //拿到数据后关闭刷新
-        mRecyclerView.setRefreshing(false);
-    }
-
 
     /**
      * 拿到数据展示
@@ -117,6 +115,8 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
      */
     @Override
     public void showRecommendList(List<Recommend.RecommendBooks> lists) {
+        //拿到数据后关闭刷新
+        mRecyclerView.setRefreshing(false);
         mAdapter.clear();
         mAdapter.addAll(lists);
     }
@@ -130,4 +130,17 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
     }
 
 
+    /**
+     * 点击进入阅读界面
+     *
+     * @param position
+     */
+    @Override
+    public void onItemClick(int position) {
+        //如果是批量管理的时候，屏蔽掉点击事件
+        if (llBatchManagement.getVisibility() == View.VISIBLE)
+            return;
+        //点击进入阅读页面
+        ReadActivity.startActivity(UIUtils.getContext(), mAdapter.getItem(position), mAdapter.getItem(position).isFromSD);
+    }
 }

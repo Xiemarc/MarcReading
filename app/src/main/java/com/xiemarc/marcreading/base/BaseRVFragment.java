@@ -87,10 +87,6 @@ public abstract class BaseRVFragment<V, T extends BasePresenter<V>, T2> extends 
     public void onLoadMore() {
     }
 
-    @Override
-    public void onItemClick(int position) {
-
-    }
 
     @Override
     public void onRefresh() {

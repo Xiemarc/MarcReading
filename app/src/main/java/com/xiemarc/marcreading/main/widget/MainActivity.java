@@ -19,6 +19,7 @@ import com.xiemarc.marcreading.utils.UIUtils;
 import com.xiemarc.marcreading.widget.CustomeIndicator;
 import com.xiemarc.marcreading.widget.GenderPopupWindow;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,10 +42,10 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
      */
     private GenderPopupWindow mGenderPopWindow;
 
-    @Override
-    protected boolean isApplyKitKatTranslucency() {
-        return true;
-    }
+//    @Override
+//    protected boolean isApplyKitKatTranslucency() {
+//        return true;
+//    }
 
     @Override
     protected MainPresenter createPresenter() {
@@ -58,6 +59,9 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     @Override
     protected int getContentViewLayoutID() {
+//        statusBarColor = ContextCompat.getColor(this, R.color.colorAccent);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         return R.layout.activity_main;
     }
 
@@ -106,7 +110,10 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         mViewPager.setOffscreenPageLimit(3);
         mIndicator.setViewPager(mViewPager, 0);
         //弹出选择男女对话框
-        mIndicator.post(() -> showChooseSexPopWindow());
+        mIndicator.postDelayed(() ->
+                //延迟500毫秒 弹出选择男女对话框
+                        showChooseSexPopWindow()
+                , 500);
     }
 
     private void showChooseSexPopWindow() {
@@ -130,8 +137,30 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        setIconsVisible(menu,true);
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    /**
+     * 解决menu不显示图标问题
+     * @param menu
+     * @param flag
+     */
+    private void setIconsVisible(Menu menu, boolean flag) {
+        //判断menu是否为空
+        if(menu != null) {
+            try {
+                //如果不为空,就反射拿到menu的setOptionalIconsVisible方法
+                Method method = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
+                //暴力访问该方法
+                method.setAccessible(true);
+                //调用该方法显示icon
+                method.invoke(menu, flag);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

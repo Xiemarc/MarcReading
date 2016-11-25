@@ -62,7 +62,6 @@ public class RecommendPresenter extends BasePresenter<RecommendView> {
             @Override
             public void onCompleted() {
                 mView.hideLoading();
-                mView.complete();
             }
         }));
     }

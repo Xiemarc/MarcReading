@@ -3,7 +3,9 @@ package com.xiemarc.marcreading.base;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import com.marc.marclibs.base.BaseAppCompatActivity;
 import com.marc.marclibs.netstatus.NetUtils;
@@ -34,6 +36,8 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends BaseAp
 
     protected PeopleProgressDialog mPeopleProgressDialog;//统一使用小人加载动画
 
+
+
     public BaseApplication getBaseApplicatub() {
         return (BaseApplication) getApplication();
     }
@@ -41,12 +45,9 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends BaseAp
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         mPresenter = createPresenter();
+        statusBarColor = ContextCompat.getColor(this, R.color.colorPrimary);
         super.onCreate(savedInstanceState);
         mPresenter.attachView((V) this);
-        if (isApplyKitKatTranslucency()) {
-            //如果这是状态栏透明
-            setSystemBarTintDrawable(getResources().getDrawable(R.drawable.sr_primary));
-        }
     }
 
     @Override
@@ -118,6 +119,31 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends BaseAp
         }
     }
 
+    protected void gone(final View... views) {
+        if (views != null && views.length > 0) {
+            for (View view : views) {
+                if (view != null) {
+                    view.setVisibility(View.GONE);
+                }
+            }
+        }
+    }
+
+    protected void visible(final View... views) {
+        if (views != null && views.length > 0) {
+            for (View view : views) {
+                if (view != null) {
+                    view.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
+    }
+
+    protected boolean isVisible(View view) {
+        return view.getVisibility() == View.VISIBLE;
+    }
+
 
     //================BaseView方法开始=================//
     @Override
@@ -180,27 +206,11 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends BaseAp
         return null;
     }
 
-    /**
-     * 设置状态栏是否透明
-     *
-     * @return
-     */
-    @Override
-    protected boolean isApplyStatusBarTranslucency() {
-        return true;
-    }
 
     //==================================实现父类的方法结束====================================//
 
     //=============================baseActivity新的抽象方法需要子类实现的========================//
 
-    /**
-     * 是否应用 状态栏变色
-     *
-     * @return 返回false  还显示状态栏
-     * 返回true  toolbar顶到状态栏位置了
-     */
-    protected abstract boolean isApplyKitKatTranslucency();
 
     /**
      * 获得指定类型的presenter
