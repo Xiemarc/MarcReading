@@ -2,6 +2,7 @@ package com.xiemarc.marcreading.bookread.presenter;
 
 import com.xiemarc.marcreading.base.BasePresenter;
 import com.xiemarc.marcreading.bean.BookToc;
+import com.xiemarc.marcreading.bean.ChapterRead;
 import com.xiemarc.marcreading.bookread.view.BookReadView;
 import com.xiemarc.marcreading.rx.rxjava.ApiCallback;
 import com.xiemarc.marcreading.rx.rxjava.SubscriberCallBack;
@@ -9,7 +10,7 @@ import com.xiemarc.marcreading.utils.StringUtils;
 
 import java.util.List;
 
-import static android.R.attr.data;
+import rx.Observable;
 
 /**
  * 描述：阅读书籍的presenter
@@ -32,13 +33,17 @@ public class BookReadPresenter extends BasePresenter<BookReadView> {
      */
     public void getBookToc(final String bookId, String viewChapters) {
         String key = StringUtils.creatAcacheKey("book-toc", bookId, viewChapters);
+
         mView.showLoading(null);
+        //map变换
+        Observable<BookToc.mixToc> fromNet = apiStore.getBookToc(bookId, viewChapters).map(bookToc -> bookToc.mixToc);
         //这里不考虑缓存
-        addSubscription(apiStore.getBookToc(bookId, viewChapters), new SubscriberCallBack<>(new ApiCallback<BookToc.mixToc>() {
+        addSubscription(fromNet, new SubscriberCallBack<>(new ApiCallback<BookToc.mixToc>() {
+
             @Override
-            public void onSuccess(BookToc.mixToc model) {
-                List<BookToc.mixToc.Chapters> list = model.chapters;
-                if (list != null && !list.isEmpty() && mView != null) {
+            public void onSuccess(BookToc.mixToc data) {
+                List<BookToc.mixToc.Chapters> list = data.chapters;
+                if (null != list && !list.isEmpty() && mView != null) {
                     mView.showBookToc(list);
                 }
             }
@@ -56,7 +61,25 @@ public class BookReadPresenter extends BasePresenter<BookReadView> {
     }
 
     public void getChapterRead(String url, final int chapter) {
+        mView.showLoading(null);
+        addSubscription(apiStore.getChapterRead(url), new SubscriberCallBack<>(new ApiCallback<ChapterRead>() {
+            @Override
+            public void onSuccess(ChapterRead data) {
+                if (data.chapter != null && mView != null) {
+                    mView.showChapterRead(data.chapter, chapter);
+                }
+            }
 
+            @Override
+            public void onFailure(int code, String msg) {
+                mView.showError(msg);
+            }
+
+            @Override
+            public void onCompleted() {
+                mView.hideLoading();
+            }
+        }));
     }
 
     public void getBookSource(String viewSummary, String book) {

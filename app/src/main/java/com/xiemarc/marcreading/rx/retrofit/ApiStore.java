@@ -1,6 +1,7 @@
 package com.xiemarc.marcreading.rx.retrofit;
 
 import com.xiemarc.marcreading.bean.BookToc;
+import com.xiemarc.marcreading.bean.ChapterRead;
 import com.xiemarc.marcreading.bean.Recommend;
 
 import retrofit2.http.GET;
@@ -32,4 +33,13 @@ public interface ApiStore {
      */
     @GET("/mix-atoc/{bookId}")
     Observable<BookToc> getBookToc(@Path("bookId") String bookId, @Query("view") String view);
+
+    /**
+     * 阅读章节内容
+     *
+     * @param url
+     * @return
+     */
+    @GET("http://chapter2.zhuishushenqi.com/chapter/{url}")
+    Observable<ChapterRead> getChapterRead(@Path("url") String url);
 }

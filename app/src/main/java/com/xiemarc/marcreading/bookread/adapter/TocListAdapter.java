@@ -14,7 +14,7 @@ import com.xiemarc.marcreading.utils.FileUtils;
 import com.xiemarc.marcreading.utils.UIUtils;
 
 /**
- * 描述：章节的adapter
+ * 描述：bottom弹出章节的adapter
  * 作者：Marc on 2016/11/25 14:26
  * 邮箱：aliali_ha@yeah.net
  */
@@ -38,6 +38,7 @@ public class TocListAdapter extends RecyclerArrayAdapter<BookToc.mixToc.Chapters
             public void setData(BookToc.mixToc.Chapters item) {
                 super.setData(item);
                 TextView tvTocItem = holder.getView(R.id.tvTocItem);//章节名称
+                tvTocItem.setText(item.title);
                 Drawable drawable;
                 //动态设置textview左侧的drawable
                 int position = holder.getLayoutPosition();
@@ -45,11 +46,11 @@ public class TocListAdapter extends RecyclerArrayAdapter<BookToc.mixToc.Chapters
                     //如果是当前章节。就设置成前面是红色的drawable
                     tvTocItem.setTextColor(UIUtils.getColor(R.color.light_red));
                     drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_toc_item_activated);
-                }else if(FileUtils.getChapterFile(bookId, position + 1).length() > 10){
+                } else if (FileUtils.getChapterFile(bookId, position + 1).length() > 10) {
                     //如果是缓存的章节
                     tvTocItem.setTextColor(ContextCompat.getColor(mContext, R.color.light_black));
                     drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_toc_item_download);
-                }else {
+                } else {
                     tvTocItem.setTextColor(ContextCompat.getColor(mContext, R.color.light_black));
                     drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_toc_item_normal);
                 }
@@ -62,6 +63,7 @@ public class TocListAdapter extends RecyclerArrayAdapter<BookToc.mixToc.Chapters
 
     /**
      * 向外暴露方法，设置当前章节
+     *
      * @param chapter
      */
     public void setCurrentChapter(int chapter) {

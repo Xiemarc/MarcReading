@@ -8,7 +8,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
 
-import com.marc.marclibs.utils.LogUtils;
 import com.xiemarc.marcreading.bean.BookToc;
 import com.xiemarc.marcreading.manager.SettingManager;
 import com.xiemarc.marcreading.manager.ThemeManager;
@@ -68,7 +67,6 @@ public abstract class BaseReadView extends View{
                 // 自动跳转到上次阅读位置
                 int pos[] = SettingManager.getInstance().getReadProgress(bookId);
                 int ret = pagefactory.openBook(pos[0], new int[]{pos[1], pos[2]});
-                LogUtils.i("上次阅读位置：chapter=" + pos[0] + " startPos=" + pos[1] + " endPos=" + pos[2]);
                 if (ret == 0) {
                     listener.onLoadChapterFailure(pos[0]);
                     return;

@@ -1,5 +1,6 @@
 package com.xiemarc.marcreading.main.widget;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +16,16 @@ import com.xiemarc.marcreading.bookread.widget.ReadActivity;
 import com.xiemarc.marcreading.main.adapter.RecommendAdapter;
 import com.xiemarc.marcreading.main.presenter.RecommendPresenter;
 import com.xiemarc.marcreading.main.view.RecommendView;
+import com.xiemarc.marcreading.manager.Constant;
 import com.xiemarc.marcreading.recycleview.adapter.RecyclerArrayAdapter;
+import com.xiemarc.marcreading.rx.event.RefreshCollectionListEvent;
 import com.xiemarc.marcreading.rx.eventbus.UserSexChooseFinishedEvent;
 import com.xiemarc.marcreading.utils.UIUtils;
 
 import java.util.List;
 
 import butterknife.Bind;
+import rx.Subscription;
 
 /**
  * 描述：书架 * 作者：Marc on 2016/11/15 16:57
@@ -79,7 +83,7 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
                 //进入发现fgragment
                 ((MainActivity) mContext).setCurrentItem(2));
 //        onRefresh();
-        RxBus.getDefault().toObservable(UserSexChooseFinishedEvent.class)
+        Subscription sexEvent = RxBus.getDefault().toObservable(UserSexChooseFinishedEvent.class)
                 .subscribe(new RxBusSubscriber<UserSexChooseFinishedEvent>() {
                     @Override
                     protected void onEvent(UserSexChooseFinishedEvent userSexChooseFinishedEvent) throws Exception {
@@ -87,6 +91,16 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
                         mPresenter.getRecommendList();
                     }
                 });
+        addSubscription(sexEvent);
+        Subscription refreshEvent = RxBus.getDefault().toObservable(RefreshCollectionListEvent.class)
+                .subscribe(new RxBusSubscriber<RefreshCollectionListEvent>() {
+                    @Override
+                    protected void onEvent(RefreshCollectionListEvent refreshCollectionListEvent) throws Exception {
+                        mRecyclerView.setRefreshing(true);
+                        onRefresh();
+                    }
+                });
+        addSubscription(refreshEvent);
 
     }
 
@@ -141,6 +155,12 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
         if (llBatchManagement.getVisibility() == View.VISIBLE)
             return;
         //点击进入阅读页面
-        ReadActivity.startActivity(UIUtils.getContext(), mAdapter.getItem(position), mAdapter.getItem(position).isFromSD);
+//        ReadActivity.startActivity(UIUtils.getContext(), mAdapter.getItem(position), mAdapter.getItem(position).isFromSD);
+        Intent intent = new Intent(UIUtils.getContext(), ReadActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Constant.INTENT_BEAN, mAdapter.getItem(position));
+        intent.putExtra(Constant.INTENT_SD, mAdapter.getItem(position).isFromSD);
+        startActivity(intent);
     }
+
 }

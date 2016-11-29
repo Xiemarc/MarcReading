@@ -29,6 +29,7 @@ public class Constant {
     public static final String SP_USER_SEX = "userChooseSex";
 
     public static final String ISNIGHT = "isNight";
+    public static final String FLIP_STYLE = "flipStyle";//翻页风格
 
     @StringDef({
             Gender.MALE,
@@ -39,5 +40,8 @@ public class Constant {
         String MALE = "male";
         String FEMALE = "female";
     }
+
+    public static final String INTENT_BEAN = "recommendBooksBean";
+    public static final String INTENT_SD = "isFromSD";
 
 }

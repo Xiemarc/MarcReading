@@ -1,14 +1,20 @@
 package com.xiemarc.marcreading.bookread.widget;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.ListPopupWindow;
+import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
@@ -20,6 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.marc.marclibs.rxbus.RxBus;
 import com.xiemarc.marcreading.R;
 import com.xiemarc.marcreading.base.BaseActivity;
 import com.xiemarc.marcreading.bean.BookSource;
@@ -33,21 +40,34 @@ import com.xiemarc.marcreading.bookread.listener.FontAndBrightnessSeekBarChangeL
 import com.xiemarc.marcreading.bookread.listener.VolumeCheckBoxListener;
 import com.xiemarc.marcreading.bookread.presenter.BookReadPresenter;
 import com.xiemarc.marcreading.bookread.view.BookReadView;
+import com.xiemarc.marcreading.manager.CacheManager;
 import com.xiemarc.marcreading.manager.CollectionsManager;
+import com.xiemarc.marcreading.manager.Constant;
 import com.xiemarc.marcreading.manager.SettingManager;
 import com.xiemarc.marcreading.manager.ThemeManager;
+import com.xiemarc.marcreading.rx.event.RefreshCollectionListEvent;
 import com.xiemarc.marcreading.utils.ScreenUtils;
+import com.xiemarc.marcreading.utils.SharedPreferencesUtil;
 import com.xiemarc.marcreading.utils.UIUtils;
 import com.xiemarc.marcreading.view.readview.BaseReadView;
+import com.xiemarc.marcreading.view.readview.OnReadStateChangeListener;
+import com.xiemarc.marcreading.view.readview.OverlappedWidget;
+import com.xiemarc.marcreading.view.readview.PageWidget;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
+import butterknife.OnClick;
+import rx.Observable;
+
+import static android.support.design.widget.BottomSheetBehavior.STATE_COLLAPSED;
 
 /**
- * 描述：阅读的activity
+ * 描述：阅读的activity <br>必须先缓存才能正常阅读。因为PageFactory中的openBook方法是读取本地数据
  * 作者：Marc on 2016/11/24 14:29
  * 邮箱：aliali_ha@yeah.net
  */
@@ -113,10 +133,19 @@ public class ReadActivity extends BaseActivity<BookReadView, BookReadPresenter> 
     CheckBox cbAutoBrightness;//自动调整亮度checkbix
     @Bind(R.id.gvTheme)
     GridView gvTheme;//加载主题背景的gridview
+    @Bind(R.id.tvClear)
+    TextView tvClear;
+    @Bind(R.id.tvBookMark)
+    TextView tvBookMark;
+    @Bind(R.id.recyclerview)
+    RecyclerView recyclerview;
+    //底部弹出视图
+    public BottomSheetBehavior behavior;
+    @Bind(R.id.blackview)
+    View blackView;
 
     private View decodeView;
     private List<BookToc.mixToc.Chapters> mChapterList = new ArrayList<>();//网络获取到的章节集合
-    private ListPopupWindow mTocListPopupWindow;//显示目录的popwindow弹出框
     private TocListAdapter mTocListAdapter;
 
     private List<BookMark> mMarkList;
@@ -128,6 +157,7 @@ public class ReadActivity extends BaseActivity<BookReadView, BookReadPresenter> 
      * 是否开始阅读章节
      **/
     private boolean startRead = false;
+    private Receiver receiver = new Receiver();//电量的广播
 
 //    /**
 //     * 朗读 播放器
@@ -200,11 +230,13 @@ public class ReadActivity extends BaseActivity<BookReadView, BookReadPresenter> 
         intentFilter.addAction(Intent.ACTION_TIME_TICK);
         //设置最近阅读时间
         CollectionsManager.getInstance().setRecentReadingTime(bookId);
-//        Observable.timer(1000, TimeUnit.MILLISECONDS)
-//                .subscribe(aLong ->
-//                //延迟1s加载书架
-//
-//                );
+        Observable.timer(1000, TimeUnit.MILLISECONDS)
+                .subscribe(aLong -> {
+                            //延迟1s加载书架
+                            UIUtils.showToast("刷新书架，显示已阅读");
+                            RxBus.getDefault().post(new RefreshCollectionListEvent());
+                        }
+                );
         //隐藏状态栏
         hideStatusBar();
         decodeView = getWindow().getDecorView();
@@ -216,59 +248,80 @@ public class ReadActivity extends BaseActivity<BookReadView, BookReadPresenter> 
         initTocList();
 
         initAASet();
-
         initPagerWidget();
-        //加载书籍
+//        加载书籍
         mPresenter.getBookToc(bookId, "chapters");
+    }
+
+    /**
+     * 初始化view翻页的widget
+     */
+    private void initPagerWidget() {
+        if (SharedPreferencesUtil.getInstance().getInt(Constant.FLIP_STYLE, 0) == 0) {
+            mPageWidget = new PageWidget(this, bookId, mChapterList, new ReadListener());
+        } else {
+            mPageWidget = new OverlappedWidget(this, bookId, mChapterList, new ReadListener());
+        }
+        registerReceiver(receiver, intentFilter);
+        if (SharedPreferencesUtil.getInstance().getBoolean(Constant.ISNIGHT, false)) {
+            //如果是夜间模式
+            mPageWidget.setTextColor(ContextCompat.getColor(this, R.color.chapter_content_night),
+                    ContextCompat.getColor(this, R.color.chapter_title_night));
+        }
+        flReadWidget.removeAllViews();
+        flReadWidget.addView(mPageWidget);
     }
 
     /**
      * 初始化章节的popwindowlist
      */
     private void initTocList() {
-        mTocListPopupWindow = new ListPopupWindow(this);
-        mTocListPopupWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
-        mTocListPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         //设置ListPopupWindow的锚点，即关联PopupWindow的显示位置和这个锚点
-        mTocListPopupWindow.setAnchorView(mLlBookReadTop);
         //放入章节的adapter\
         mTocListAdapter = new TocListAdapter(UIUtils.getContext(), currentChapter, bookId);
-        mTocListPopupWindow.setAdapter(null);
+        recyclerview.setLayoutManager(new LinearLayoutManager(UIUtils.getContext()));//默认竖向
         //添加关闭listpopwindow的监听
-        mTocListPopupWindow.setOnDismissListener(() -> {
-            //把显示书名的texdtview隐藏
-            gone(mTvBookReadTocTitle);
-            visible(mTvBookReadReading, mTvBookReadCommunity, mTvBookReadChangeSource);
-        });
-        //点击
-        mTocListPopupWindow.setOnItemClickListener((adapterView, view, position, id) -> {
-            mTocListPopupWindow.dismiss();
-            currentChapter = position + 1;
-            mTocListAdapter.setCurrentChapter(currentChapter);
-            startRead = false;
-            readCurrentChapter();
-            hideReadBar();
-        });
         mTocListAdapter.setOnItemClickListener(position -> {
-            mTocListPopupWindow.dismiss();
             currentChapter = position + 1;
             mTocListAdapter.setCurrentChapter(currentChapter);
             startRead = false;
             readCurrentChapter();
             hideReadBar();
+            //关闭behavoir
+            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         });
+        recyclerview.setAdapter(mTocListAdapter);
+        behavior = BottomSheetBehavior.from(recyclerview);
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == STATE_COLLAPSED || newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    //如果是完全打开或者完全关闭
+                    gone(blackView);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                visible(blackView);
+                //这个方法也可以调整窗口透明度
+                ViewCompat.setAlpha(blackView, slideOffset);
+            }
+        });
+        blackView.setBackgroundColor(Color.parseColor("#60000000"));
+        gone(blackView);
+        blackView.setOnClickListener(view ->
+                //点击滑动关闭
+                behavior.setState(STATE_COLLAPSED)
+        );
     }
 
     /**
      * 读取currentChapter章节。章节文件存在则直接阅读，不存在则请求
      */
     public void readCurrentChapter() {
-//        先不考虑缓存
-//        if (CacheManager.getInstance().getChapterFile(bookId, currentChapter) != null) {
-//            showChapterRead(null, currentChapter);
-//        } else {
+        // 先不考虑缓存
         mPresenter.getChapterRead(mChapterList.get(currentChapter - 1).link, currentChapter);
-//        }
     }
 
     /**
@@ -307,38 +360,38 @@ public class ReadActivity extends BaseActivity<BookReadView, BookReadPresenter> 
     }
 
 
-    /**
-     * 初始化读书页面
-     */
-    private void initPagerWidget() {
-        你好();
-    }
-    public void 你好(){
-    }
-
-    //添加收藏需要，所以跳转的时候传递整个实体类
-    public static void startActivity(Context context, Recommend.RecommendBooks recommendBooks) {
-        startActivity(context, recommendBooks, false);
-    }
-
-    // 开始阅读
-    public static void startActivity(Context context, Recommend.RecommendBooks recommendBooks, boolean isFromSD) {
-        context.startActivity(new Intent(context, ReadActivity.class)
-                .putExtra(INTENT_BEAN, recommendBooks)
-                .putExtra(INTENT_SD, isFromSD));
-    }
-
     @Override
     public void showBookToc(List<BookToc.mixToc.Chapters> list) {
         mChapterList.clear();
         mChapterList.addAll(list);
-
-//        readCurrentChapter();
+        mTocListAdapter.clear();
+        mTocListAdapter.addAll(list);
+        readCurrentChapter();
     }
 
+    /**
+     * 开始阅读本章节内容
+     *
+     * @param data
+     * @param chapter
+     */
     @Override
-    public void showChapterRead(ChapterRead.Chapter data, int chapter) {
+    public synchronized void showChapterRead(ChapterRead.Chapter data, int chapter) {
+        if (data != null) {
+            //保存书籍文件
+            CacheManager.getInstance().saveChapterFile(bookId, chapter, data);
+        }
 
+        if (!startRead) {
+            startRead = true;//当前阅读状态设置为true
+            currentChapter = chapter;//当前章节设置为本章节
+            if (!mPageWidget.isPrepared) {
+                //如果阅读widget未初始化
+                mPageWidget.init(curTheme);
+            } else {
+                mPageWidget.jumpToChapter(currentChapter);
+            }
+        }
     }
 
     @Override
@@ -355,23 +408,6 @@ public class ReadActivity extends BaseActivity<BookReadView, BookReadPresenter> 
         //同时隐藏状态栏
         hideStatusBar();
         //动态设置状态栏
-//        setSystemUiVisibility(int visibility)方法可传入的实参为：
-//
-//        1. View.SYSTEM_UI_FLAG_VISIBLE：显示状态栏，Activity不全屏显示(恢复到有状态的正常情况)。
-//
-//        2. View.INVISIBLE：隐藏状态栏，同时Activity会伸展全屏显示。
-//
-//        3. View.SYSTEM_UI_FLAG_FULLSCREEN：Activity全屏显示，且状态栏被隐藏覆盖掉。
-//
-//        4. View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN：Activity全屏显示，但状态栏不会被隐藏覆盖，状态栏依然可见，Activity顶端布局部分会被状态遮住。
-//
-//        5. View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION：效果同View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//
-//        6. View.SYSTEM_UI_LAYOUT_FLAGS：效果同View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//
-//        7. View.SYSTEM_UI_FLAG_HIDE_NAVIGATION：隐藏虚拟按键(导航栏)。有些手机会用虚拟按键来代替物理按键。
-//
-//        8. View.SYSTEM_UI_FLAG_LOW_PROFILE：状态栏显示处于低能显示状态(low profile模式)，状态栏上一些图标显示会被隐藏。
         decodeView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
     }
 
@@ -423,4 +459,90 @@ public class ReadActivity extends BaseActivity<BookReadView, BookReadPresenter> 
         //把屏幕亮度设置成当前sp保存的值
         ScreenUtils.setScreenBrightness(value, ReadActivity.this);
     }
+
+    // 根据手指动作切换
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+
+        } else if (keyCode == KeyEvent.KEYCODE_MENU) {
+            toggleReadBar();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+
+    @OnClick({R.id.ivBack, R.id.tvBookReadReading, R.id.tvBookReadCommunity
+            , R.id.tvBookReadIntroduce, R.id.tvBookReadMode, R.id.tvBookReadSettings, R.id.tvBookReadDownload, R.id.tvBookMark, R.id.tvBookReadToc
+            , R.id.ivBrightnessMinus, R.id.ivBrightnessPlus, R.id.tvFontsizeMinus, R.id.tvFontsizePlus, R.id.tvClear, R.id.tvAddMark
+    })
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.ivBack:
+                finish();
+                break;
+            case R.id.tvBookReadReading:
+                showError("我母鸡啊");
+                break;
+            case R.id.tvBookReadToc://章节
+                if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                    behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+                break;
+        }
+    }
+
+    class ReadListener implements OnReadStateChangeListener {
+        @Override
+        public void onChapterChanged(int chapter) {
+            currentChapter = chapter;
+            mTocListAdapter.setCurrentChapter(currentChapter);
+            // 加载前一节 与 后三节
+            for (int i = chapter - 1; i <= chapter + 3 && i <= mChapterList.size(); i++) {
+                if (i > 0 && i != chapter) {
+                    mPresenter.getChapterRead(mChapterList.get(i - 1).link, i);
+                }
+            }
+        }
+
+        @Override
+        public void onPageChanged(int chapter, int page) {
+        }
+
+        @Override
+        public void onLoadChapterFailure(int chapter) {
+            startRead = false;
+            //如果缓存为空，继续请求数据
+            if (CacheManager.getInstance().getChapterFile(bookId, chapter) == null) {
+                mPresenter.getChapterRead(mChapterList.get(chapter - 1).link, chapter);
+            }
+        }
+
+        @Override
+        public void onCenterClick() {
+            toggleReadBar();
+        }
+
+        @Override
+        public void onFlip() {
+            //翻页的时候隐藏阅读的商业栏
+            hideReadBar();
+        }
+    }
+
+    class Receiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mPageWidget != null) {
+                if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                    int level = intent.getIntExtra("level", 0);
+                    mPageWidget.setBattery(100 - level);
+                } else if (Intent.ACTION_TIME_TICK.equals(intent.getAction())) {
+                    mPageWidget.setTime(sdf.format(new Date()));
+                }
+            }
+        }
+    }
+
 }
