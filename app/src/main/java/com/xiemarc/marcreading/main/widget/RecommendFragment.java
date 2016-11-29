@@ -16,6 +16,7 @@ import com.xiemarc.marcreading.bookread.widget.ReadActivity;
 import com.xiemarc.marcreading.main.adapter.RecommendAdapter;
 import com.xiemarc.marcreading.main.presenter.RecommendPresenter;
 import com.xiemarc.marcreading.main.view.RecommendView;
+import com.xiemarc.marcreading.manager.CollectionsManager;
 import com.xiemarc.marcreading.manager.Constant;
 import com.xiemarc.marcreading.recycleview.adapter.RecyclerArrayAdapter;
 import com.xiemarc.marcreading.rx.event.RefreshCollectionListEvent;
@@ -96,8 +97,9 @@ public class RecommendFragment extends BaseRVFragment<RecommendView, RecommendPr
                 .subscribe(new RxBusSubscriber<RefreshCollectionListEvent>() {
                     @Override
                     protected void onEvent(RefreshCollectionListEvent refreshCollectionListEvent) throws Exception {
-                        mRecyclerView.setRefreshing(true);
-                        onRefresh();
+                        //更新书籍状态，不显示小红点
+                        llBatchManagement.setVisibility(View.GONE);
+                        List<Recommend.RecommendBooks> data = CollectionsManager.getInstance().getCollectionListBySort();
                     }
                 });
         addSubscription(refreshEvent);

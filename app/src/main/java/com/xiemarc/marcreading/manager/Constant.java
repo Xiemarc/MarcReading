@@ -28,8 +28,9 @@ public class Constant {
 
     public static final String SP_USER_SEX = "userChooseSex";
 
-    public static final String ISNIGHT = "isNight";
+    public static final String ISNIGHT = "isNight";//是否是夜间模式
     public static final String FLIP_STYLE = "flipStyle";//翻页风格
+    public static final String ISBYUPDATESORT = "isByUpdateSort";
 
     @StringDef({
             Gender.MALE,

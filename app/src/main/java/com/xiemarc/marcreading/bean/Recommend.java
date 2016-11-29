@@ -40,10 +40,10 @@ public class Recommend extends Base{
         public String path = "";
         public int latelyFollower;
         public double retentionRatio;
-        public String updated = "";
+        public String updated = "";//更新时间
         public int chaptersCount;
         public String lastChapter;
-        public String recentReadingTime = "";
+        public String recentReadingTime = "";//最近阅读时间
 
         @Override
         public boolean equals(Object obj) {
