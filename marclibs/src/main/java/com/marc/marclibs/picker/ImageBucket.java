@@ -22,12 +22,6 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Author:  Tau.Chen
- * Email:   1076559197@qq.com | tauchen1990@gmail.com
- * Date:    15/6/1.
- * Description:
- */
 public class ImageBucket implements Parcelable {
     public int count;
     public String bucketName;

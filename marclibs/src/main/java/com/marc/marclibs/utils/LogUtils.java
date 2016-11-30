@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class LogUtils {
 	/** 日志输出时的TAG */
-	private static String mTag = "GooglePlay";
+	private static String mTag = "aat";
 	/** 日志输出级别NONE */
 	public static final int LEVEL_OFF = 0;
 	/** 日志输出级别NONE */

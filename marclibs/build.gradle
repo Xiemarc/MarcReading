@@ -35,7 +35,7 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.jakewharton:butterknife:7.0.1'
     //注解
     //json解析 fastJsons
@@ -54,10 +54,7 @@ dependencies {
     compile 'com.facebook.fresco:fresco:0.12.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
-    //在4.4的translucent 模式下（translucent modes），为状态栏以及导航栏设置背景颜色。
-    compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
 
-//
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.0.2'
     compile 'com.squareup.retrofit2:converter-scalars:2.0.0'
@@ -65,15 +62,17 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.0'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
+//    compile 'com.zzhoujay.richtext:richtext:2.2.2'
+    compile 'com.zzhoujay.markdown:markdown:1.0.1'
 }
 
 // 项目引用的版本号，比如compile 'com.yanzhenjie:andserver:1.0.1'中的1.0.1就是这里配置的。
-version = "1.1.2"
+version = "1.1.0"
 
 // 定义两个链接，下面会用到。
-def siteUrl = 'https://github.com/Xiemarc/AatMonitol' // 项目主页。
-def gitUrl = 'https://github.com/Xiemarc/AatMonitol.git' // Git仓库的url。
-group = "com.xie"
+def siteUrl = 'https://github.com/Xiemarc/MarcReading' // 项目主页。
+def gitUrl = 'https://github.com/Xiemarc/MarcReading.git' // Git仓库的url。
+group = "com.richlib"
 install {
     repositories.mavenInstaller {
         // 生成pom.xml和参数
@@ -141,7 +140,7 @@ bintray {
 
     configurations = ['archives']
     pkg {
-        repo = "maven"  // 上传到maven库。
+        repo = "RichLib"  // 上传到maven库。
         name = "andxie"
         // 发布到Bintray上的项目名字，这里的名字不是compile 'com.yanzhenjie:andserver:1.0.1'中的andserver。
         websiteUrl = siteUrl

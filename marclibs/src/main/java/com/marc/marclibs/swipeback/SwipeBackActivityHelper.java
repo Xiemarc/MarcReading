@@ -25,9 +25,6 @@ import android.view.View;
 import com.marc.marclibs.R;
 
 
-/**
- * @author Yrom
- */
 public class SwipeBackActivityHelper {
     private Activity mActivity;
 

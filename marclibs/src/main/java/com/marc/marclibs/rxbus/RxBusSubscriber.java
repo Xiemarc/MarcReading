@@ -4,11 +4,6 @@ import com.marc.marclibs.utils.logger.Logger;
 
 import rx.Subscriber;
 
-/**
- * Desction:
- * Author:pengjianbo
- * Date:16/7/22 下午2:40
- */
 public abstract class RxBusSubscriber<T> extends Subscriber<T> {
 
     @Override

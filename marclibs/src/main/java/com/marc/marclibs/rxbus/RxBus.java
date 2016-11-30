@@ -11,11 +11,6 @@ import rx.subjects.SerializedSubject;
 import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
 
-/**
- * Desction:
- * Author:pengjianbo
- * Date:16/7/22 下午2:40
- */
 public class RxBus {
 
     private static volatile RxBus mInstance;

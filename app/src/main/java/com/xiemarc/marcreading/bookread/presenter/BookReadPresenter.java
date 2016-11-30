@@ -35,8 +35,10 @@ public class BookReadPresenter extends BasePresenter<BookReadView> {
         String key = StringUtils.creatAcacheKey("book-toc", bookId, viewChapters);
 
         mView.showLoading(null);
-        //map变换
-        Observable<BookToc.mixToc> fromNet = apiStore.getBookToc(bookId, viewChapters).map(bookToc -> bookToc.mixToc);
+        //map变换  lambda表达式。map矩阵变幻。 a -> b  把a转换成b的类型 然后返回b
+
+        Observable<BookToc.mixToc> fromNet = apiStore.getBookToc(bookId, viewChapters)
+                .map(bookToc -> bookToc.mixToc);
         //这里不考虑缓存
         addSubscription(fromNet, new SubscriberCallBack<>(new ApiCallback<BookToc.mixToc>() {
 
